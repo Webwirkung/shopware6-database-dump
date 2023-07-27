@@ -80,6 +80,7 @@ Options:
   -u --user      Set database user name
   -H --host      Set hostname for database server (default: 127.0.0.1)
   -p --port      Set database server port (default: 3306)
+  -pw --password Set password of database user
   --gdpr         Enable GDPR data filtering
 HEREDOC
 }
@@ -100,6 +101,7 @@ _DATABASE=
 _HOST=127.0.0.1
 _PORT=3306
 _USER=
+_PASSWORD=
 
 __get_option_value() {
   local __arg="${1:-}"
@@ -144,6 +146,10 @@ do
       _PORT="$(__get_option_value "${__arg}" "${__val:-}")"
       shift
       ;;
+    -pw|--password)
+      _PASSWORD="$(__get_option_value "${__arg}" "${__val:-}")"
+      shift
+      ;;
     --endopts)
       # Terminate option parsing.
       break
@@ -170,7 +176,7 @@ _dump() {
     _COLUMN_STATISTICS="--column-statistics=0"
   fi
 
-  mysqldump ${_COLUMN_STATISTICS} --no-tablespaces --quick -C --hex-blob --single-transaction --no-data --host=${_HOST} --port=${_PORT} --user=${_USER} -p ${_DATABASE} | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' > ${_FILENAME}
+  mysqldump ${_COLUMN_STATISTICS} --no-tablespaces --quick -C --hex-blob --single-transaction --no-data --host=${_HOST} --port=${_PORT} --user=${_USER} -p${_PASSWORD} ${_DATABASE} | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' > ${_FILENAME}
 
   _IGNORED_TABLES=()
 
@@ -236,7 +242,7 @@ _dump() {
 
   printf ">> Creating data dump...\\n"
 
-  mysqldump ${_COLUMN_STATISTICS} --no-tablespaces --no-create-info --skip-triggers --quick -C --hex-blob --single-transaction --host=${_HOST} --port=${_PORT} --user=${_USER} -p "${_IGNORED_TABLES_ARGUMENTS[@]}" ${_DATABASE} \
+  mysqldump ${_COLUMN_STATISTICS} --no-tablespaces --no-create-info --skip-triggers --quick -C --hex-blob --single-transaction --host=${_HOST} --port=${_PORT} --user=${_USER} -p${_PASSWORD} "${_IGNORED_TABLES_ARGUMENTS[@]}" ${_DATABASE} \
     | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' \
     >> ${_FILENAME}
 

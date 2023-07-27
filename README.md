@@ -27,6 +27,7 @@ Options:
   -u --user      Set database user name
   -H --host      Set hostname for database server (default: 127.0.0.1)
   -p --port      Set database server port (default: 3306)
+  -pw --password Set password of database user
   --gdpr         Enable GDPR data filtering
 ```
 
