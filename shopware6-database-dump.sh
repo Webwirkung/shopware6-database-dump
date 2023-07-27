@@ -242,7 +242,7 @@ _dump() {
 
   printf ">> Creating data dump...\\n"
 
-  mysqldump ${_COLUMN_STATISTICS} --no-tablespaces --no-create-info --skip-triggers --quick -C --hex-blob --single-transaction --host=${_HOST} --port=${_PORT} --user=${_USER} -p${_PASSWORD} "${_IGNORED_TABLES_ARGUMENTS[@]}" ${_DATABASE} \
+  mysqldump ${_COLUMN_STATISTICS} --no-tablespaces --no-create-info --skip-triggers --quick -C --hex-blob --single-transaction --host=${_HOST} --port=${_PORT} --user=${_USER} -pw${_PASSWORD} "${_IGNORED_TABLES_ARGUMENTS[@]}" ${_DATABASE} \
     | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' \
     >> ${_FILENAME}
 
