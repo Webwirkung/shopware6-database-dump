@@ -67,8 +67,8 @@ _print_help() {
 Dumps a Shopware 6 database with a bit of cleanup and a GDPR mode ignoring more data.
 
 Usage:
-  ${_ME} [filename.sql] --database db_name --user username [--host 127.0.0.1] [--port 3306] [--gdpr]
-  ${_ME} [filename.sql] -d db_name -u username [-H 127.0.0.1] [-p 3306] [--gdpr]
+  ${_ME} [filename.sql] --database db_name --user username --password password [--host 127.0.0.1] [--port 3306] [--gdpr]
+  ${_ME} [filename.sql] -d db_name -u username -l password [-H 127.0.0.1] [-p 3306] [--gdpr]
   ${_ME} -h | --help
 
 Arguments:
@@ -80,7 +80,7 @@ Options:
   -u --user      Set database user name
   -H --host      Set hostname for database server (default: 127.0.0.1)
   -p --port      Set database server port (default: 3306)
-  -pw --password Set password of database user
+  -l --password  Set password of database user
   --gdpr         Enable GDPR data filtering
 HEREDOC
 }
@@ -146,7 +146,7 @@ do
       _PORT="$(__get_option_value "${__arg}" "${__val:-}")"
       shift
       ;;
-    -pw|--password)
+    -l|--password)
       _PASSWORD="$(__get_option_value "${__arg}" "${__val:-}")"
       shift
       ;;
@@ -176,7 +176,7 @@ _dump() {
     _COLUMN_STATISTICS="--column-statistics=0"
   fi
 
-  mysqldump ${_COLUMN_STATISTICS} --no-tablespaces --quick -C --hex-blob --single-transaction --no-data --host=${_HOST} --port=${_PORT} --user=${_USER} -p${_PASSWORD} ${_DATABASE} | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' > ${_FILENAME}
+  mysqldump ${_COLUMN_STATISTICS} --no-tablespaces --quick -C --hex-blob --single-transaction --no-data --host=${_HOST} --port=${_PORT} --user=${_USER} --password=${_PASSWORD} ${_DATABASE} | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' > ${_FILENAME}
 
   _IGNORED_TABLES=()
 
