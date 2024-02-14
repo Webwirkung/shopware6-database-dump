@@ -231,6 +231,11 @@ _dump() {
       unzer_payment_transfer_info
       crefo_pay_transaction_refund_history
       crefo_pay_transaction_capture_history
+      ww_booking
+      ww_booking_slot
+      ww_booking_attendee
+      ww_trail_email_token
+      ww_trail_stop_email
     )
   fi
 
