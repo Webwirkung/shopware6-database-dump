@@ -229,6 +229,8 @@ _dump() {
       payone_payment_redirect
       unzer_payment_payment_device
       unzer_payment_transfer_info
+      postfinancecheckout_refund
+      postfinancecheckout_transaction
       crefo_pay_transaction_refund_history
       crefo_pay_transaction_capture_history
       ww_booking
