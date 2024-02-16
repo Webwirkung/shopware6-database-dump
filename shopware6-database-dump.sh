@@ -176,7 +176,10 @@ _dump() {
     _COLUMN_STATISTICS="--column-statistics=0"
   fi
 
-  mysqldump ${_COLUMN_STATISTICS} --no-tablespaces --quick -C --hex-blob --single-transaction --no-data --host=${_HOST} --port=${_PORT} --user=${_USER} --password=${_PASSWORD} ${_DATABASE} | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' > ${_FILENAME}
+  mysqldump ${_COLUMN_STATISTICS} --no-tablespaces --quick -C --hex-blob --single-transaction --no-data --host=${_HOST} --port=${_PORT} --user=${_USER} --password=${_PASSWORD} ${_DATABASE} \
+  | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' \
+  | LANG=C LC_CTYPE=C LC_ALL=C sed -e '/^ALTER DATABASE/d' \
+  > ${_FILENAME}
 
   _IGNORED_TABLES=()
 
@@ -208,7 +211,6 @@ _dump() {
       order_line_item
       order_tag
       order_transaction
-      product_export
       product_review
       promotion_persona_customer
       refresh_token
@@ -227,6 +229,15 @@ _dump() {
       payone_payment_redirect
       unzer_payment_payment_device
       unzer_payment_transfer_info
+      postfinancecheckout_refund
+      postfinancecheckout_transaction
+      crefo_pay_transaction_refund_history
+      crefo_pay_transaction_capture_history
+      ww_booking
+      ww_booking_slot
+      ww_booking_attendee
+      ww_trail_email_token
+      ww_trail_stop_email
     )
   fi
 
@@ -244,6 +255,7 @@ _dump() {
 
   mysqldump ${_COLUMN_STATISTICS} --no-tablespaces --no-create-info --skip-triggers --quick -C --hex-blob --single-transaction --host=${_HOST} --port=${_PORT} --user=${_USER} --password=${_PASSWORD} "${_IGNORED_TABLES_ARGUMENTS[@]}" ${_DATABASE} \
     | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' \
+    | LANG=C LC_CTYPE=C LC_ALL=C sed -e '/^ALTER DATABASE/d' \
     >> ${_FILENAME}
 
   printf ">> Gzipping dump...\\n"
