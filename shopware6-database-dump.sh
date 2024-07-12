@@ -258,6 +258,21 @@ _dump() {
     | LANG=C LC_CTYPE=C LC_ALL=C sed -e '/^ALTER DATABASE/d' \
     >> ${_FILENAME}
 
+  printf ">> Updating system_config...\\n"
+  mysql --host=${_HOST} --port=${_PORT} --user=${_USER} --password=${_PASSWORD} ${_DATABASE} <<EOF
+DELETE FROM system_config WHERE configuration_key = 'core.mailerSettings.disableDelivery';
+INSERT INTO system_config (id, configuration_key, configuration_value, sales_channel_id, created_at, updated_at)
+VALUES (
+    UNHEX(REPLACE(UUID(), '-', '')),
+    'core.mailerSettings.disableDelivery',
+    '{"_value":true}',
+    NULL,
+    NOW(),
+    NOW()
+);
+EOF
+
+
   printf ">> Gzipping dump...\\n"
   gzip ${_FILENAME}
 
