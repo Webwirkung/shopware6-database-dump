@@ -67,21 +67,22 @@ _print_help() {
 Dumps a Shopware 6 database with a bit of cleanup and a GDPR mode ignoring more data.
 
 Usage:
-  ${_ME} [filename.sql] --database db_name --user username --password password [--host 127.0.0.1] [--port 3306] [--gdpr]
-  ${_ME} [filename.sql] -d db_name -u username -l password [-H 127.0.0.1] [-p 3306] [--gdpr]
+  ${_ME} [filename.sql] --database db_name --user username --password password [--host 127.0.0.1] [--port 3306] [--gdpr] [--keep-user-data]
+  ${_ME} [filename.sql] -d db_name -u username -l password [-H 127.0.0.1] [-p 3306] [--gdpr] [--keep-user-data]
   ${_ME} -h | --help
 
 Arguments:
   filename.sql   Set output filename, will be gzipped, dump.sql by default
 
 Options:
-  -h --help      Display this help information.
-  -d --database  Set database name
-  -u --user      Set database user name
-  -H --host      Set hostname for database server (default: 127.0.0.1)
-  -p --port      Set database server port (default: 3306)
-  -l --password  Set password of database user
-  --gdpr         Enable GDPR data filtering
+  -h --help          Display this help information.
+  -d --database      Set database name
+  -u --user          Set database user name
+  -H --host          Set hostname for database server (default: 127.0.0.1)
+  -p --port          Set database server port (default: 3306)
+  -l --password      Set password of database user
+  --gdpr             Enable GDPR data filtering
+  --keep-user-data   Keeping Shopware user tables when --gdpr option is used
 HEREDOC
 }
 
@@ -97,6 +98,7 @@ _USE_DEBUG=0
 
 # Initialize additional expected option variables.
 _OPTION_GDPR=0
+_OPTION_KEEP_USER_DATA=0
 _DATABASE=
 _HOST=127.0.0.1
 _PORT=3306
@@ -129,6 +131,9 @@ do
       ;;
     --gdpr)
       _OPTION_GDPR=1
+      ;;
+    --keep-user-data)
+      _OPTION_KEEP_USER_DATA=1
       ;;
     -d|--database)
       _DATABASE="$(__get_option_value "${__arg}" "${__val:-}")"
@@ -216,10 +221,6 @@ _dump() {
       refresh_token
       sales_channel_api_context
       state_machine_history
-      user
-      user_access_key
-      user_config
-      user_recovery
       version
       version_commit
       version_commit_data
@@ -239,6 +240,16 @@ _dump() {
       ww_trail_email_token
       ww_trail_stop_email
     )
+
+    if ((!_OPTION_KEEP_USER_DATA))
+    then
+      _IGNORED_TABLES+=(
+        user
+        user_access_key
+        user_config
+        user_recovery
+      )
+    fi
   fi
 
   _IGNORED_TABLES+=('enqueue')
