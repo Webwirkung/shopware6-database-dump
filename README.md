@@ -17,18 +17,19 @@ Run `./shopware6-database-dump.sh` to see available options:
 Dumps a Shopware 6 database with a bit of cleanup and a GDPR mode ignoring more data.
 
 Usage:
-  shopware6-database-dump.sh --database db_name --user username [--host 127.0.0.1] [--port 3306] [--gdpr]
-  shopware6-database-dump.sh -d db_name -u username [-H 127.0.0.1] [-p 3306] [--gdpr]
+  shopware6-database-dump.sh --database db_name --user username [--host 127.0.0.1] [--port 3306] [--gdpr] [--keep-user-data]
+  shopware6-database-dump.sh -d db_name -u username [-H 127.0.0.1] [-p 3306] [--gdpr] [--keep-user-data]
   shopware6-database-dump.sh -h | --help
 
 Options:
-  -h --help      Display this help information.
-  -d --database  Set database name
-  -u --user      Set database user name
-  -H --host      Set hostname for database server (default: 127.0.0.1)
-  -p --port      Set database server port (default: 3306)
-  -pw --password Set password of database user
-  --gdpr         Enable GDPR data filtering
+  -h --help          Display this help information.
+  -d --database      Set database name
+  -u --user          Set database user name
+  -H --host          Set hostname for database server (default: 127.0.0.1)
+  -p --port          Set database server port (default: 3306)
+  -pw --password     Set password of database user
+  --gdpr             Enable GDPR data filtering
+  --keep-user-data   Keeping Shopware user tables when --gdpr option is used
 ```
 
 Your dump will be written to `dump.sql.gz`.
