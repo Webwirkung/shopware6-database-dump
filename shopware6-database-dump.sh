@@ -83,6 +83,7 @@ Options:
   -l --password      Set password of database user
   --gdpr             Enable GDPR data filtering
   --keep-user-data   Keeping Shopware user tables when --gdpr option is used
+  --keep-integrations  Comma-separated list of integration labels to keep when --gdpr option is used (e.g. "Playwright,Shopmon")
 HEREDOC
 }
 
@@ -99,6 +100,7 @@ _USE_DEBUG=0
 # Initialize additional expected option variables.
 _OPTION_GDPR=0
 _OPTION_KEEP_USER_DATA=0
+_OPTION_KEEP_INTEGRATIONS=
 _DATABASE=
 _HOST=127.0.0.1
 _PORT=3306
@@ -134,6 +136,10 @@ do
       ;;
     --keep-user-data)
       _OPTION_KEEP_USER_DATA=1
+      ;;
+    --keep-integrations)
+      _OPTION_KEEP_INTEGRATIONS="$(__get_option_value "${__arg}" "${__val:-}")"
+      shift
       ;;
     -d|--database)
       _DATABASE="$(__get_option_value "${__arg}" "${__val:-}")"
@@ -268,6 +274,30 @@ _dump() {
     | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' \
     | LANG=C LC_CTYPE=C LC_ALL=C sed -e '/^ALTER DATABASE/d' \
     >> ${_FILENAME}
+
+  if ((_OPTION_GDPR)) && [[ -n "${_OPTION_KEEP_INTEGRATIONS}" ]]
+  then
+    # Build SQL IN clause from comma-separated labels
+    _INTEGRATION_WHERE=$(echo "${_OPTION_KEEP_INTEGRATIONS}" | sed "s/[^,]*/'&'/g")
+
+    printf ">> Preserving integrations: %s\\n" "${_OPTION_KEEP_INTEGRATIONS}"
+
+    mysqldump ${_COLUMN_STATISTICS} --no-tablespaces --no-create-info --skip-triggers --quick -C --hex-blob --single-transaction \
+      --host=${_HOST} --port=${_PORT} --user=${_USER} --password=${_PASSWORD} \
+      --where="label IN (${_INTEGRATION_WHERE})" \
+      ${_DATABASE} integration \
+      | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' \
+      | LANG=C LC_CTYPE=C LC_ALL=C sed -e '/^ALTER DATABASE/d' \
+      >> ${_FILENAME}
+
+    mysqldump ${_COLUMN_STATISTICS} --no-tablespaces --no-create-info --skip-triggers --quick -C --hex-blob --single-transaction \
+      --host=${_HOST} --port=${_PORT} --user=${_USER} --password=${_PASSWORD} \
+      --where="integration_id IN (SELECT id FROM integration WHERE label IN (${_INTEGRATION_WHERE}))" \
+      ${_DATABASE} integration_role \
+      | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' \
+      | LANG=C LC_CTYPE=C LC_ALL=C sed -e '/^ALTER DATABASE/d' \
+      >> ${_FILENAME}
+  fi
 
   printf ">> Gzipping dump...\\n"
   gzip ${_FILENAME}
